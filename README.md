@@ -20,3 +20,16 @@
 
      and use 
      <script src="js/signalr.js"></script> in html
+     
+    3.2
+    
+    Next, we need to register the required services in ConfigureServices:, before Use
+
+    services.AddSignalR();
+    We will be implementing a simple chat client, so, we will register a chat hub, in the Configure method:
+
+    app.UseSignalR(routes =>
+    {
+        routes.MapHub<ChatHub>("chat");
+    });
+    A note: UseSignalR must be called before UseMvc!
