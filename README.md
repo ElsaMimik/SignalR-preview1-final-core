@@ -22,10 +22,7 @@
 
     3.1. 
     
-    copy to wwwroot
-
-     and use 
-     <script src="js/signalr.js"></script> in html
+    copy signalr.js to wwwroot/js 
      
     3.2
     
@@ -42,12 +39,12 @@
 
     app.UseSignalR(routes =>
     {
-        routes.MapHub<ChatHub>("chat");
+        routes.MapHub<ChatHub>("/chathub");
     });
     A note: UseSignalR must be called before UseMvc!
     
     3.4
     
-    Create html file
+    Create html file and use 
     
-    <script src="js/signalr.js"></script> in html
+    <script src="js/signalr.js"></script> in your html file
