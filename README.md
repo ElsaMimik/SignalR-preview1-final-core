@@ -37,6 +37,7 @@
     services.AddSignalR();
     We will be implementing a simple chat client, so, we will register a chat hub, in the Configure method:
 
+    app.UseWebSockets();
     app.UseSignalR(routes =>
     {
         routes.MapHub<ChatHub>("/chathub");
