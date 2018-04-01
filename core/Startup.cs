@@ -40,6 +40,7 @@ namespace core
             }
 
             app.UseStaticFiles();
+            app.UseWebSockets();
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ChatHub>("/ChatHub");
