@@ -8,82 +8,77 @@ var HiggsSignalR = HiggsSignalR || {}
 HiggsSignalR = {
     transport: signalR.TransportType.WebSockets,
     connections: [],
-    connection: class {
-        constructor(status, hub) {
-            this.status = status
-            this.hub = hub
-        }
+    getConnectionHub: function (connectionHub) {
+        return this.connections.find(s => s.connection.baseUrl == connectionHub)
     },
-    getConnectionHub: function(connectionHub) {
-        return this.connections.find(s => s.hub == connectionHub)
-    },
-    addConnectionHub: function(connectionHub) {
+    addConnectionHub: function (connectionHub) {
         var conn = this.getConnectionHub(connectionHub)
-        if (this.conn) {
-            if (!this.conn.status) {
-                this.connections.splice(this.connections.findIndex(s => s.hub === connectionHub), 1)
-                this.connections.push(new this.connection(true, connectionHub))
+        if (conn) {
+            if (conn.connection.connectionState !== 1) {
+                this.connections.splice(this.connections.findIndex(s => s.connection.baseUrl === connectionHub), 1)
+                this.connections.push(connectionHub)
             }
         } else {
-            this.connections.push(new this.connection(true, connectionHub))
+            this.connections.push(connectionHub)
         }
     },
-    //regist
-    regist: function(hub, method, callback) {
-        var connHub = new signalR.HubConnection(hub, {
-            transport: transport
-        })
+    // regist
+    // var t = () => {console.log('aaaa')}
+    // HiggsSignalR.regist('http://localhost:51100/chathub','testmethod',t)
+    regist: function (hub, method, callback) {
+        var connHub = new signalR.HubConnection(hub, { transport: this.transport })
+        this.addConnectionHub(connHub)
         connHub.on(method, msg => {
             callback()
         })
     },
-    //connecting the server to the signalr hub
-    start: function() {
-        connection
-            .start()
-            .then(() => {
-                console.log('start')
-                isConnected = true
-                addLine('message-list', 'Connected successfully', 'green')
-            })
-            .catch(err => {
-                addLine('message-list', err, 'red')
-            })
-    },
-    //connecting the server to the signalr hub
-    stop: function() {
-        connection
-            .stop()
-            .then(() => {
-                console.log('stop')
-                isConnected = false
-            })
-            .catch(err => {
-                addLine('message-list', err, 'red')
-            })
-    },
-    retry: function() {
-        //reconnect
-    },
-    //connecting the server to the signalr hub
-    invoke: function() {
-        if (!isConnected) {
-            return
-        }
-        var argsArray = Array.prototype.slice.call(arguments)
-        connection.invoke
-            .apply(connection, argsArray.slice(1))
-            .then(result => {
-                console.log(
-                    'invocation completed successfully: ' +
-                    (result === null ? '(null)' : result)
-                )
-                if (result) {
-                    addLine('message-list', result)
-                }
-            })
-            .catch(err => {
-                addLine('message-list', err, 'red')
-            })
-    },
+    ////connecting the server to the signalr hub
+    //start: function () {
+    //    connection
+    //        .start()
+    //        .then(() => {
+    //            console.log('start')
+    //            isConnected = true
+    //            addLine('message-list', 'Connected successfully', 'green')
+    //        })
+    //        .catch(err => {
+    //            addLine('message-list', err, 'red')
+    //        })
+    //},
+    ////connecting the server to the signalr hub
+    //stop: function () {
+    //    connection
+    //        .stop()
+    //        .then(() => {
+    //            console.log('stop')
+    //            isConnected = false
+    //        })
+    //        .catch(err => {
+    //            addLine('message-list', err, 'red')
+    //        })
+    //},
+    //retry: function () {
+    //    //reconnect
+    //},
+    ////connecting the server to the signalr hub
+    //invoke: function () {
+    //    if (!isConnected) {
+    //        return
+    //    }
+    //    var argsArray = Array.prototype.slice.call(arguments)
+    //    connection.invoke
+    //        .apply(connection, argsArray.slice(1))
+    //        .then(result => {
+    //            console.log(
+    //                'invocation completed successfully: ' +
+    //                (result === null ? '(null)' : result)
+    //            )
+    //            if (result) {
+    //                addLine('message-list', result)
+    //            }
+    //        })
+    //        .catch(err => {
+    //            addLine('message-list', err, 'red')
+    //        })
+    //},
 }
