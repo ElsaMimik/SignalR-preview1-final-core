@@ -8,10 +8,10 @@ var HiggsSignalR = HiggsSignalR || {}
 HiggsSignalR = {
     transport: signalR.TransportType.WebSockets,
     connections: [],
-    getConnectionHub: function (connectionHub) {
-        return this.connections.find(s => s.connection.baseUrl == connectionHub)
+    getConnectionHub: function(connectionHub) {
+        return this.connections.find(s => s.connection.baseUrl === connectionHub.connection.baseUrl)
     },
-    addConnectionHub: function (connectionHub) {
+    addConnectionHub: function(connectionHub) {
         var conn = this.getConnectionHub(connectionHub)
         if (conn) {
             if (conn.connection.connectionState !== 1) {
@@ -25,8 +25,11 @@ HiggsSignalR = {
     // regist
     // var t = () => {console.log('aaaa')}
     // HiggsSignalR.regist('http://localhost:51100/chathub','testmethod',t)
-    regist: function (hub, method, callback) {
-        var connHub = new signalR.HubConnection(hub, { transport: this.transport })
+    regist: function(hub, method, callback) {
+        var isExist = this.connections.find(s => s.connection.baseUrl === hub)
+        var connHub = isExist || new signalR.HubConnection(hub, {
+            transport: this.transport
+        })
         this.addConnectionHub(connHub)
         connHub.on(method, msg => {
             callback()
