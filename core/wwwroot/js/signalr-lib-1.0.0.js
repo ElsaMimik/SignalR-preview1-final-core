@@ -4,7 +4,8 @@
  * 2018-04-16
  * @
  */
-var HiggsSignalR = {
+var HiggsSignalR = HiggsSignalR || {}
+HiggsSignalR = {
     transport: signalR.TransportType.WebSockets,
     connections: [],
     connection: class {
