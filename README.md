@@ -48,3 +48,6 @@
     Create html file and use 
     
     <script src="js/signalr.js"></script> in your html file
+    
+    
+-- [SignalR Core Silde](https://docs.google.com/presentation/d/10feEVSSOssgkpHFQkvETy2eLjwGs391hzTUhkzWhJys/edit#slide=id.p)
