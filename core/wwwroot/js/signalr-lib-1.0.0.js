@@ -70,52 +70,52 @@ const HiggsSignalR = {
     return this.connections
   },
   // connecting the server to the signalr hub
-  start(hub, callback, error) {
+  async start(hub, callback, error) {
     var conn = this.connections.find(s => s.connection.baseUrl === hub)
     conn
       .start()
-      .then(() => {
+      .then(result => {
+        console.log('start' + (result === null || !result ? '' : ' :' + result))
         callback()
       })
       .catch(err => {
         console.log(err)
         error()
       })
+    return this.connections
   },
-  invoke(hub, method, ...args) {
+  async invoke(hub, method, ...args) {
     var conn = this.connections.find(s => s.connection.baseUrl === hub)
     var argsArray = Array.prototype.slice.call(arguments)
     conn.invoke
       .apply(conn, argsArray.slice(1))
       .then(result => {
         console.log(
-          'invocation completed successfully: ' +
-            (result === null ? '(null)' : result)
+          'invocation completed successfully' +
+            (result === null || !result ? '' : ' :' + result)
         )
-        if (result) {
-          addLine('message-list', result)
-        }
       })
       .catch(err => {
         console.log(err)
-        addLine('message-list', err, 'red')
       })
+    return this.connections
   },
-  stop(hub, callback, error) {
+  async stop(hub, callback, error) {
     var conn = this.connections.find(s => s.connection.baseUrl === hub)
     conn
       .stop()
-      .then(() => {
+      .then(result => {
+        console.log('stop' + (result === null || !result ? '' : ' :' + result))
         callback()
       })
       .catch(err => {
         console.log(err)
         error()
       })
-    console.log('left')
+    return this.connections
   }
 }
-
+/*******************************/
 function test() {
   var GetMsg = msg => {
     console.log('SendMsgConsole', msg)
@@ -132,7 +132,7 @@ function test() {
   )
 
   var ShowLog = () => {
-    console.log('ShowLog')
+    console.log('ShowLog 2018-04-16')
   }
   HiggsSignalR.start(
     `http://${document.location.host}/chathub?accessToken=123`,
@@ -140,13 +140,22 @@ function test() {
     ShowLog
   )
 }
-function testInvoke() {
+function testInvokeJoinGroup() {
+  HiggsSignalR.invoke(
+    `http://${document.location.host}/chathub?accessToken=123`,
+    'JoinGroup',
+    'Group01'
+  )
+  return ''
+}
+function testInvokeSendToGroup() {
   HiggsSignalR.invoke(
     `http://${document.location.host}/chathub?accessToken=123`,
     'SendToGroup',
     'Group01',
     'Hello'
   )
+  return ''
 }
 function testStop() {
   var ShowLog = () => {
@@ -154,7 +163,7 @@ function testStop() {
   }
   HiggsSignalR.stop(
     `http://${document.location.host}/chathub?accessToken=123`,
-    ShowLog,
     ShowLog
   )
+  return ''
 }
