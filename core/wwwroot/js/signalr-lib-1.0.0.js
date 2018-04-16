@@ -38,7 +38,7 @@ HiggsSignalR = {
   // regist
   // var t = () => {console.log('aaaa')}
   // HiggsSignalR.regist('http://localhost:51100/chathub','testmethod',t)
-  regist: function(hub, method, callback) {
+  regist: async function(hub, method, callback) {
     var isExist = this.connections.find(s => s.connection.baseUrl === hub)
     var connHub =
       isExist ||
@@ -49,13 +49,14 @@ HiggsSignalR = {
     connHub.on(method, msg => {
       callback()
     })
+    return this.connections
   },
   //   var t = () => {console.log('aaaa')}
   //   var methods = []
   //   methods.push(new HiggsSignalR.registClass('testmethod01',t))
   //   methods.push(new HiggsSignalR.registClass('testmethod02',t))
   //   HiggsSignalR.mulRegist('http://localhost:51100/chathub',methods)
-  mulRegist: function(hub, ...regArg) {
+  mulRegist: async function(hub, ...regArg) {
     var isExist = this.connections.find(s => s.connection.baseUrl === hub)
     var connHub =
       isExist ||
@@ -69,6 +70,7 @@ HiggsSignalR = {
         element.callback()
       })
     }
+    return this.connections
   }
   ////connecting the server to the signalr hub
   //start: function () {
