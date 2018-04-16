@@ -67,6 +67,11 @@ const HiggsSignalR = {
     for (let element of argsArray) {
       connHub.on(element.method, element.callback)
     }
+    connHub.connection.onclose = e => {
+      console.log('retry', e)
+      console.log('disconnected')
+      test()
+    }
     return this.connections
   },
   // connecting the server to the signalr hub
