@@ -136,6 +136,14 @@ function test() {
     ShowLog
   )
 }
+function testInvoke() {
+  HiggsSignalR.invoke(
+    `http://${document.location.host}/chathub?accessToken=123`,
+    'SendToGroup',
+    'Group01',
+    'Hello'
+  )
+}
 function testStop() {
   var ShowLog = () => {
     console.log('ShowLog')
