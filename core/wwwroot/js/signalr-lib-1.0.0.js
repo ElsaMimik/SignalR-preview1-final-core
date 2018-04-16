@@ -67,12 +67,28 @@ const HiggsSignalR = {
     for (let element of argsArray) {
       connHub.on(element.method, element.callback)
     }
+    // (1)
     connHub.connection.onclose = e => {
-      console.log('retry', e)
-      console.log('disconnected')
-      test()
+      console.log('disconnected', e)
+      // (2)
+      this.retry()
     }
     return this.connections
+  },
+  // 300ms檢查一次 | check status === 3 才retry
+  // 手動關閉的設定一個flag不要檢查上面那個條件
+  // (3)
+  async retry() {
+    console.log('retry')
+    // ......
+  },
+  // var testMethod = () => {console.log('12345678910')}
+  // HiggsSignalR.resetOn(`http://${document.location.host}/chathub?accessToken=123`,'SendMsgConsole',testMethod)
+  // remove and add (4)
+  async resetOn(hub, method, callback) {
+    var conn = this.connections.find(s => s.connection.baseUrl === hub)
+    conn.methods.delete(method.toLowerCase()) ////(1)off method
+    conn.on(method, callback)
   },
   // connecting the server to the signalr hub
   async start(hub, callback, error) {
@@ -105,6 +121,7 @@ const HiggsSignalR = {
       })
     return this.connections
   },
+  // (1)
   async stop(hub, callback, error) {
     var conn = this.connections.find(s => s.connection.baseUrl === hub)
     conn
