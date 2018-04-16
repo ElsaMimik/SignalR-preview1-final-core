@@ -2,7 +2,11 @@
  * JavaScript and TypeScript clients for SignalR for ASP.NET Core
  * library for signalr Dependents signalr.js -version preview1-1.0.0
  * 2018-04-16
- * @
+ * 
+ * @ HiggsSignalR.mulRegist
+ * @ HiggsSignalR.start
+ * @ HiggsSignalR.invoke
+ * @ HiggsSignalR.stop
  */
 const HiggsSignalR = {
   transport: signalR.TransportType.WebSockets,
@@ -78,19 +82,6 @@ const HiggsSignalR = {
         error()
       })
   },
-  stop(hub, callback, error) {
-    var conn = this.connections.find(s => s.connection.baseUrl === hub)
-    conn
-      .stop()
-      .then(() => {
-        callback()
-      })
-      .catch(err => {
-        console.log(err)
-        error()
-      })
-    console.log('left')
-  },
   invoke(hub, method, ...args) {
     var conn = this.connections.find(s => s.connection.baseUrl === hub)
     var argsArray = Array.prototype.slice.call(arguments)
@@ -109,6 +100,19 @@ const HiggsSignalR = {
         console.log(err)
         addLine('message-list', err, 'red')
       })
+  },
+  stop(hub, callback, error) {
+    var conn = this.connections.find(s => s.connection.baseUrl === hub)
+    conn
+      .stop()
+      .then(() => {
+        callback()
+      })
+      .catch(err => {
+        console.log(err)
+        error()
+      })
+    console.log('left')
   }
 }
 
