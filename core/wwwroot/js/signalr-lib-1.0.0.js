@@ -4,7 +4,7 @@
  * 2018-04-16
  * @
  */
-var HiggsSignalR = {
+const HiggsSignalR = {
   transport: signalR.TransportType.WebSockets,
   connections: [],
   registClass: class {
@@ -38,7 +38,7 @@ var HiggsSignalR = {
   // regist
   // var t = () => {console.log('aaaa')}
   // HiggsSignalR.regist(`http://${document.location.host}/chathub?accessToken=123`,'testmethod',t)
-  regist: async function(hub, method, callback) {
+  async regist(hub, method, callback) {
     var isExist = this.connections.find(s => s.connection.baseUrl === hub)
     var connHub =
       isExist ||
@@ -51,7 +51,7 @@ var HiggsSignalR = {
     })
     return this.connections
   },
-  mulRegist: async function(hub, ...regArg) {
+  async mulRegist(hub, ...regArg) {
     var isExist = this.connections.find(s => s.connection.baseUrl === hub)
     var connHub =
       isExist ||
@@ -78,8 +78,19 @@ var HiggsSignalR = {
         error()
       })
   },
-  stop() {},
-  onClosed() {},
+  stop(hub, callback, error) {
+    var conn = this.connections.find(s => s.connection.baseUrl === hub)
+    conn
+      .stop()
+      .then(() => {
+        callback()
+      })
+      .catch(err => {
+        console.log(err)
+        error()
+      })
+    console.log('left')
+  },
   invoke(hub, method, ...args) {
     var conn = this.connections.find(s => s.connection.baseUrl === hub)
     var argsArray = Array.prototype.slice.call(arguments)
@@ -95,6 +106,7 @@ var HiggsSignalR = {
         }
       })
       .catch(err => {
+        console.log(err)
         addLine('message-list', err, 'red')
       })
   }
@@ -119,6 +131,16 @@ function test() {
     console.log('ShowLog')
   }
   HiggsSignalR.start(
+    `http://${document.location.host}/chathub?accessToken=123`,
+    ShowLog,
+    ShowLog
+  )
+}
+function testStop() {
+  var ShowLog = () => {
+    console.log('ShowLog')
+  }
+  HiggsSignalR.stop(
     `http://${document.location.host}/chathub?accessToken=123`,
     ShowLog,
     ShowLog
