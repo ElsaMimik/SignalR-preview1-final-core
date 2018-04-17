@@ -89,14 +89,17 @@ const HiggsSignalR = {
           element.callback
         )
     }
-    // (1) ............. 斷線時 hub 沒有值
-    connHub.connection.onclose = (hub, e) => {
+    // (1) 斷線時connHub
+    connHub.connection.onclose = e => {
       console.log('disconnected', e)
       // (2)
-      var isExist = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+      var isExist = this.connStatus.find(
+        s => s.hub.connection.baseUrl === connHub.connection.baseUrl
+      )
       if (isExist) {
-        if (isExist.isStop) {
-          this.retry()
+        // 不是人為關閉的情況
+        if (!isExist.isStop) {
+          this.retry(connHub)
         }
       }
     }
@@ -105,7 +108,8 @@ const HiggsSignalR = {
   // 300ms檢查一次 | check status === 3 才retry
   // 手動關閉的設定一個flag不要檢查上面那個條件
   // (3)
-  async retry() {
+  async retry(connHub) {
+    console.log('connHub', connHub)
     console.log('retry')
     // ......
   },
