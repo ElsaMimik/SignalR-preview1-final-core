@@ -81,7 +81,13 @@ const HiggsSignalR = {
     this.addConnectionHub(connHub)
     var argsArray = Array.prototype.slice.call(arguments).slice(1)
     for (let element of argsArray) {
-      connHub.on(element.method, element.callback)
+      if (!isExist) connHub.on(element.method, element.callback)
+      else
+        this.resetOn(
+          isExist.connection.baseUrl,
+          element.method,
+          element.callback
+        )
     }
     // (1)
     connHub.connection.onclose = e => {
