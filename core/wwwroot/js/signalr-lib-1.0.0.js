@@ -110,7 +110,10 @@ const HiggsSignalR = {
   // (3)
   async retry(connHub) {
     console.log('connHub', connHub)
-    console.log('retry')
+    var func = () => {
+      console.log('retry')
+    }
+    this.start(connHub, func, func)
     // ......
   },
   // var testMethod = () => {console.log('12345678910')}
@@ -124,7 +127,12 @@ const HiggsSignalR = {
   // connecting the server to the signalr hub
   async start(hub, callback, error) {
     var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
-    conn.hub
+    if (conn) {
+      conn = conn.hub
+    } else {
+      conn = hub
+    }
+    conn
       .start()
       .then(result => {
         console.log('start' + (result === null || !result ? '' : ' :' + result))
