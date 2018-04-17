@@ -10,7 +10,15 @@
  */
 const HiggsSignalR = {
   transport: signalR.TransportType.WebSockets,
-  connections: [],
+  // connections: [],
+  connStatus: [],
+  connStatusClass: class {
+    constructor(hub, retryTimes, isStop) {
+      this.hub = hub
+      this.retryTimes = retryTimes
+      this.isStop = isStop
+    }
+  },
   registClass: class {
     constructor(method, callback /*, msg*/) {
       this.method = method
@@ -18,45 +26,53 @@ const HiggsSignalR = {
       // this.msg = msg
     }
   },
-  getConnectionHub(connectionHub) {
-    return this.connections.find(
-      s => s.connection.baseUrl === connectionHub.connection.baseUrl
+  // getConnectionHub(connectionHub) {
+  //   return this.connections.find(
+  //     s => s.connection.baseUrl === connectionHub.connection.baseUrl
+  //   )
+  // },
+  getConnStatus(hubBaseUrl) {
+    return this.connStatus.find(
+      s => s.hub.connection.baseUrl === hubBaseUrl.connection.baseUrl
     )
   },
   addConnectionHub(connectionHub) {
-    var conn = this.getConnectionHub(connectionHub)
+    var conn = this.getConnStatus(connectionHub)
     if (conn) {
-      if (conn.connection.connectionState !== 1) {
-        this.connections.splice(
-          this.connections.findIndex(
-            s => s.connection.baseUrl === connectionHub
+      if (conn.hub.connection.connectionState !== 1) {
+        this.connStatus.splice(
+          this.connStatus.findIndex(
+            s => s.hub.connection.baseUrl === connectionHub
           ),
           1
         )
-        this.connections.push(connectionHub)
+        // this.connections.push(connectionHub)
+        this.connStatus.push(new this.connStatusClass(connectionHub, 0, false))
       }
     } else {
-      this.connections.push(connectionHub)
+      // this.connections.push(connectionHub)
+      this.connStatus.push(new this.connStatusClass(connectionHub, 0, false))
     }
   },
   // regist
   // var t = () => {console.log('aaaa')}
   // HiggsSignalR.regist(`http://${document.location.host}/chathub?accessToken=123`,'testmethod',t)
   async regist(hub, method, callback) {
-    var isExist = this.connections.find(s => s.connection.baseUrl === hub)
+    var isExist = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
     var connHub =
       isExist ||
       new signalR.HubConnection(hub, {
         transport: this.transport
       })
     this.addConnectionHub(connHub)
-    connHub.on(method, msg => {
+    connHub.hub.on(method, msg => {
       callback()
     })
-    return this.connections
+    // return this.connStatus.hub
   },
   async mulRegist(hub, ...regArg) {
-    var isExist = this.connections.find(s => s.connection.baseUrl === hub)
+    var isExist = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+    isExist = isExist ? isExist.hub : isExist
     var connHub =
       isExist ||
       new signalR.HubConnection(hub, {
@@ -73,7 +89,7 @@ const HiggsSignalR = {
       // (2)
       this.retry()
     }
-    return this.connections
+    // return this.connStatus.hub
   },
   // 300ms檢查一次 | check status === 3 才retry
   // 手動關閉的設定一個flag不要檢查上面那個條件
@@ -86,14 +102,14 @@ const HiggsSignalR = {
   // HiggsSignalR.resetOn(`http://${document.location.host}/chathub?accessToken=123`,'SendMsgConsole',testMethod)
   // remove and add (4)
   async resetOn(hub, method, callback) {
-    var conn = this.connections.find(s => s.connection.baseUrl === hub)
-    conn.methods.delete(method.toLowerCase()) ////(1)off method
-    conn.on(method, callback)
+    var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+    conn.hub.methods.delete(method.toLowerCase()) ////(1)off method
+    conn.hub.on(method, callback)
   },
   // connecting the server to the signalr hub
   async start(hub, callback, error) {
-    var conn = this.connections.find(s => s.connection.baseUrl === hub)
-    conn
+    var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+    conn.hub
       .start()
       .then(result => {
         console.log('start' + (result === null || !result ? '' : ' :' + result))
@@ -103,13 +119,13 @@ const HiggsSignalR = {
         console.log(err)
         error()
       })
-    return this.connections
+    // return this.connStatus.hub
   },
   async invoke(hub, method, ...args) {
-    var conn = this.connections.find(s => s.connection.baseUrl === hub)
+    var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
     var argsArray = Array.prototype.slice.call(arguments)
-    conn.invoke
-      .apply(conn, argsArray.slice(1))
+    conn.hub.invoke
+      .apply(conn.hub, argsArray.slice(1))
       .then(result => {
         console.log(
           'invocation completed successfully' +
@@ -119,12 +135,12 @@ const HiggsSignalR = {
       .catch(err => {
         console.log(err)
       })
-    return this.connections
+    // return this.connStatus.hub
   },
   // (1)
   async stop(hub, callback, error) {
-    var conn = this.connections.find(s => s.connection.baseUrl === hub)
-    conn
+    var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+    conn.hub
       .stop()
       .then(result => {
         console.log('stop' + (result === null || !result ? '' : ' :' + result))
@@ -134,7 +150,7 @@ const HiggsSignalR = {
         console.log(err)
         error()
       })
-    return this.connections
+    // return this.connStatus.hub
   }
 }
 /*******************************/
