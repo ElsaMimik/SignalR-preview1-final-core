@@ -3,7 +3,7 @@
  * library for signalr Dependents signalr.js -version preview1-1.0.0
  * 2018-04-16
  * 
- * @ HiggsSignalR.mulRegist
+ * @ HiggsSignalR.mulRegister
  * @ HiggsSignalR.start
  * @ HiggsSignalR.invoke
  * @ HiggsSignalR.stop
@@ -19,7 +19,7 @@ const HiggsSignalR = {
       this.isStop = isStop
     }
   },
-  registClass: class {
+  registerClass: class {
     constructor(method, callback /*, msg*/) {
       this.method = method
       this.callback = callback
@@ -54,10 +54,10 @@ const HiggsSignalR = {
       this.connStatus.push(new this.connStatusClass(connectionHub, 0, false))
     }
   },
-  // regist
+  // register
   // var t = () => {console.log('aaaa')}
-  // HiggsSignalR.regist(`http://${document.location.host}/chathub?accessToken=123`,'testmethod',t)
-  async regist(hub, method, callback) {
+  // HiggsSignalR.register(`http://${document.location.host}/chathub?accessToken=123`,'testmethod',t)
+  async register(hub, method, callback) {
     var isExist = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
     var connHub =
       isExist ||
@@ -70,7 +70,7 @@ const HiggsSignalR = {
     })
     // return this.connStatus.hub
   },
-  async mulRegist(hub, ...regArg) {
+  async mulRegister(hub, ...regArg) {
     var isExist = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
     isExist = isExist ? isExist.hub : isExist
     var connHub =
@@ -93,7 +93,7 @@ const HiggsSignalR = {
     connHub.connection.onclose = e => {
       console.log('disconnected', e)
       // (2)
-      this.retry()
+      // if (isExist.isStop) this.retry()
     }
     // return this.connStatus.hub
   },
@@ -146,6 +146,7 @@ const HiggsSignalR = {
   // (1)
   async stop(hub, callback, error) {
     var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+    conn.isStop = true //手動關閉
     conn.hub
       .stop()
       .then(result => {
@@ -169,10 +170,10 @@ function test() {
     console.log('GetMsg', msg)
     addLine('message-list', msg)
   }
-  HiggsSignalR.mulRegist(
+  HiggsSignalR.mulRegister(
     `http://${document.location.host}/chathub?accessToken=123`,
-    new HiggsSignalR.registClass('GetMsg', GetMsg),
-    new HiggsSignalR.registClass('SendMsgConsole', SendMsgConsole)
+    new HiggsSignalR.registerClass('GetMsg', GetMsg),
+    new HiggsSignalR.registerClass('SendMsgConsole', SendMsgConsole)
   )
 
   var ShowLog = () => {
@@ -190,7 +191,7 @@ function testInvokeJoinGroup() {
     'JoinGroup',
     'Group01'
   )
-  return ''
+  // return ''
 }
 function testInvokeSendToGroup() {
   HiggsSignalR.invoke(
@@ -199,7 +200,7 @@ function testInvokeSendToGroup() {
     'Group01',
     'Hello'
   )
-  return ''
+  // return ''
 }
 function testStop() {
   var ShowLog = () => {
@@ -207,7 +208,8 @@ function testStop() {
   }
   HiggsSignalR.stop(
     `http://${document.location.host}/chathub?accessToken=123`,
+    ShowLog,
     ShowLog
   )
-  return ''
+  // return ''
 }
