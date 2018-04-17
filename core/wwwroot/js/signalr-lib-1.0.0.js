@@ -89,11 +89,16 @@ const HiggsSignalR = {
           element.callback
         )
     }
-    // (1)
-    connHub.connection.onclose = e => {
+    // (1) ............. 斷線時 hub 沒有值
+    connHub.connection.onclose = (hub, e) => {
       console.log('disconnected', e)
       // (2)
-      // if (isExist.isStop) this.retry()
+      var isExist = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+      if (isExist) {
+        if (isExist.isStop) {
+          this.retry()
+        }
+      }
     }
     // return this.connStatus.hub
   },
