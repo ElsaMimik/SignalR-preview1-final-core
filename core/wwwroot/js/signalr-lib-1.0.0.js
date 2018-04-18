@@ -44,7 +44,7 @@ const HiggsSignalR = {
   addConnectionHub(connectionHub) {
     var conn = this.getConnStatus(connectionHub)
     if (conn) {
-      if (conn.hub.connection.connectionState !== 1) {
+      if (conn.hub.connection.connectionState !== ConnectionStatus.Connected) {
         this.connStatus.splice(
           this.connStatus.findIndex(
             s => s.hub.connection.baseUrl === connectionHub
@@ -103,7 +103,10 @@ const HiggsSignalR = {
       )
       if (isExist) {
         // 不是人為關閉的情況
-        if (!isExist.isStop) {
+        if (
+          !isExist.isStop &&
+          isExist.hub.connection.connectionState !== ConnectionStatus.Connected
+        ) {
           this.retry(connHub)
         }
       }
