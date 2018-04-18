@@ -18,10 +18,12 @@ const HiggsSignalR = {
   // connections: [],
   connStatus: [],
   connStatusClass: class {
-    constructor(hub, retryTimes, isStop) {
+    constructor(hub, retryTimes, isStop, callback, error) {
       this.hub = hub
       this.retryTimes = retryTimes
       this.isStop = isStop
+      this.callback = callback
+      this.error = error
     }
   },
   registerClass: class {
@@ -123,7 +125,7 @@ const HiggsSignalR = {
     var func = () => {
       console.log('retry')
     }
-    this.start(connHub, func, func)
+    this.start(connHub)
     // ......
   },
   // var testMethod = () => {console.log('12345678910')}
@@ -137,20 +139,29 @@ const HiggsSignalR = {
   // connecting the server to the signalr hub
   async start(hub, callback, error) {
     var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+    // var _conn
     if (conn) {
-      conn = conn.hub
+      // _conn = conn.hub
     } else {
-      conn = hub
+      conn = this.connStatus.find(
+        s => s.hub.connection.baseUrl === hub.connection.baseUrl
+      )
     }
-    conn
+    if (!conn.callback || callback) {
+      conn.callback = callback
+    }
+    if (!conn.error || error) {
+      conn.error = error
+    }
+    conn.hub
       .start()
       .then(result => {
         console.log('start' + (result === null || !result ? '' : ' :' + result))
-        callback()
+        callback ? callback() : conn.callback()
       })
       .catch(err => {
         console.log(err)
-        error()
+        error ? error() : conn.error()
       })
     // return this.connStatus.hub
   },
