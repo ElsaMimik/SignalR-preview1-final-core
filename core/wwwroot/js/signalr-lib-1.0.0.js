@@ -8,11 +8,11 @@
  * @ HiggsSignalR.invoke
  * @ HiggsSignalR.stop
  */
-const ConnectionStatus = {
+const ConnectionStatus = Object.freeze({
   Connected: 1,
   Disconnected: 2,
   Error: 3
-}
+})
 const HiggsSignalR = {
   transport: signalR.TransportType.WebSockets,
   // connections: [],
