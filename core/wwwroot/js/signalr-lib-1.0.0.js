@@ -129,7 +129,10 @@ const HiggsSignalR = {
       s => s.hub.connection.baseUrl === connHub.connection.baseUrl
     )
     //setTimer
-    while (conn.retryTimes < 4) {
+    while (
+      conn.retryTimes < 4 &&
+      conn.hub.connection.connectionState !== ConnectionStatus.Connected
+    ) {
       conn.retryTimes += 1 //三次為限，間隔300ms
       let times = conn.retryTimes
       setTimeout(() => {
