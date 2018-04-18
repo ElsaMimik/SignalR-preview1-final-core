@@ -8,6 +8,11 @@
  * @ HiggsSignalR.invoke
  * @ HiggsSignalR.stop
  */
+const ConnectionStatus = {
+  Connected: 1,
+  Disconnected: 2,
+  Error: 3
+}
 const HiggsSignalR = {
   transport: signalR.TransportType.WebSockets,
   // connections: [],
@@ -106,7 +111,7 @@ const HiggsSignalR = {
     // return this.connStatus.hub
   },
   // 300ms檢查一次 | check status === 3 才retry
-  // Connecting = 0 ; Disconnected = 2 新的
+  // Connecting = 0 ; Connected = 1 ; Disconnected = 2 新的
   // onnecting: 0, connected: 1, reconnecting: 2, disconnected: 4 舊的
   // 手動關閉的設定一個flag不要檢查上面那個條件
   // (3)
