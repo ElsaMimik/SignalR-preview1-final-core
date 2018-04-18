@@ -125,13 +125,19 @@ const HiggsSignalR = {
   async retry(connHub) {
     console.log('connHub', connHub)
     console.log('retry')
-    //setTimer
     var conn = this.connStatus.find(
       s => s.hub.connection.baseUrl === connHub.connection.baseUrl
     )
-    conn.retryTimes += 1 //三次為限
-    this.start(connHub)
-    // ......
+    //setTimer
+    while (conn.retryTimes < 4) {
+      conn.retryTimes += 1 //三次為限，間隔300ms
+      let times = conn.retryTimes
+      setTimeout(() => {
+        // ......
+        console.log('conn.retryTimes' + times)
+        this.start(connHub)
+      }, 300 * conn.retryTimes)
+    }
   },
   // var testMethod = () => {console.log('12345678910')}
   // HiggsSignalR.resetOn(`http://${document.location.host}/chathub?accessToken=123`,'SendMsgConsole',testMethod)
