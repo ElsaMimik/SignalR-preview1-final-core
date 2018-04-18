@@ -88,6 +88,8 @@ const HiggsSignalR = {
     this.addConnectionHub(connHub)
     var argsArray = Array.prototype.slice.call(arguments).slice(1)
     for (let element of argsArray) {
+      // 如果已存在該method則刪除再加入
+      // 否則會造成合併method內容
       if (!isExist) connHub.on(element.method, element.callback)
       else
         this.resetOn(
@@ -122,9 +124,12 @@ const HiggsSignalR = {
   // (3)
   async retry(connHub) {
     console.log('connHub', connHub)
-    var func = () => {
-      console.log('retry')
-    }
+    console.log('retry')
+    //setTimer
+    var conn = this.connStatus.find(
+      s => s.hub.connection.baseUrl === connHub.connection.baseUrl
+    )
+    conn.retryTimes += 1 //三次為限
     this.start(connHub)
     // ......
   },
