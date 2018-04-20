@@ -33,50 +33,6 @@ const HiggsSignalR = {
       // this.msg = msg
     }
   },
-  // getConnectionHub(connectionHub) {
-  //   return this.connections.find(
-  //     s => s.connection.baseUrl === connectionHub.connection.baseUrl
-  //   )
-  // },
-  getConnStatus(hubBaseUrl) {
-    return this.connStatus.find(
-      s => s.hub.connection.baseUrl === hubBaseUrl.connection.baseUrl
-    )
-  },
-  addConnectionHub(connectionHub) {
-    var conn = this.getConnStatus(connectionHub)
-    if (conn) {
-      if (conn.hub.connection.connectionState !== ConnectionStatus.Connected) {
-        this.connStatus.splice(
-          this.connStatus.findIndex(
-            s => s.hub.connection.baseUrl === connectionHub
-          ),
-          1
-        )
-        // this.connections.push(connectionHub)
-        this.connStatus.push(new this.connStatusClass(connectionHub, 0, false))
-      }
-    } else {
-      // this.connections.push(connectionHub)
-      this.connStatus.push(new this.connStatusClass(connectionHub, 0, false))
-    }
-  },
-  // register
-  // var t = () => {console.log('aaaa')}
-  // HiggsSignalR.register(`http://${document.location.host}/chathub?accessToken=123`,'testmethod',t)
-  async register(hub, method, callback) {
-    var isExist = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
-    var connHub =
-      isExist ||
-      new signalR.HubConnection(hub, {
-        transport: this.transport
-      })
-    this.addConnectionHub(connHub)
-    connHub.hub.on(method, msg => {
-      callback()
-    })
-    // return this.connStatus.hub
-  },
   async mulRegister(hub, ...regArg) {
     var isExist = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
     isExist = isExist ? isExist.hub : isExist
@@ -117,40 +73,6 @@ const HiggsSignalR = {
     }
     // return this.connStatus.hub
   },
-  // 300ms檢查一次 | check status === 3 才retry
-  // Connecting = 0 ; Connected = 1 ; Disconnected = 2 新的
-  // onnecting: 0, connected: 1, reconnecting: 2, disconnected: 4 舊的
-  // 手動關閉的設定一個flag不要檢查上面那個條件
-  // (3)
-  async retry(connHub) {
-    console.log('connHub', connHub)
-    console.log('retry')
-    var conn = this.connStatus.find(
-      s => s.hub.connection.baseUrl === connHub.connection.baseUrl
-    )
-    //setTimer
-    while (
-      conn.retryTimes < 4 &&
-      conn.hub.connection.connectionState !== ConnectionStatus.Connected
-    ) {
-      conn.retryTimes += 1 //三次為限，間隔300ms
-      let times = conn.retryTimes
-      setTimeout(() => {
-        // ......
-        console.log('conn.retryTimes' + times)
-        this.start(connHub)
-      }, 300 * conn.retryTimes)
-    }
-  },
-  // var testMethod = () => {console.log('12345678910')}
-  // HiggsSignalR.resetOn(`http://${document.location.host}/chathub?accessToken=123`,'SendMsgConsole',testMethod)
-  // remove and add (4)
-  async resetOn(hub, method, callback) {
-    var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
-    conn.hub.methods.delete(method.toLowerCase()) ////(1)off method
-    conn.hub.on(method, callback)
-  },
-  // connecting the server to the signalr hub
   async start(hub, callback, error) {
     var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
     // var _conn
@@ -210,9 +132,89 @@ const HiggsSignalR = {
         error()
       })
     // return this.connStatus.hub
+  },
+  // getConnectionHub(connectionHub) {
+  //   return this.connections.find(
+  //     s => s.connection.baseUrl === connectionHub.connection.baseUrl
+  //   )
+  // },
+  getConnStatus(hubBaseUrl) {
+    return this.connStatus.find(
+      s => s.hub.connection.baseUrl === hubBaseUrl.connection.baseUrl
+    )
+  },
+  addConnectionHub(connectionHub) {
+    var conn = this.getConnStatus(connectionHub)
+    if (conn) {
+      if (conn.hub.connection.connectionState !== ConnectionStatus.Connected) {
+        this.connStatus.splice(
+          this.connStatus.findIndex(
+            s => s.hub.connection.baseUrl === connectionHub
+          ),
+          1
+        )
+        // this.connections.push(connectionHub)
+        this.connStatus.push(new this.connStatusClass(connectionHub, 0, false))
+      }
+    } else {
+      // this.connections.push(connectionHub)
+      this.connStatus.push(new this.connStatusClass(connectionHub, 0, false))
+    }
+  },
+  // register
+  // var t = () => {console.log('aaaa')}
+  // HiggsSignalR.register(`http://${document.location.host}/chathub?accessToken=123`,'testmethod',t)
+  async register(hub, method, callback) {
+    var isExist = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+    var connHub =
+      isExist ||
+      new signalR.HubConnection(hub, {
+        transport: this.transport
+      })
+    this.addConnectionHub(connHub)
+    connHub.hub.on(method, msg => {
+      callback()
+    })
+    // return this.connStatus.hub
+  },
+
+  // 300ms檢查一次 | check status === 3 才retry
+  // Connecting = 0 ; Connected = 1 ; Disconnected = 2 新的
+  // onnecting: 0, connected: 1, reconnecting: 2, disconnected: 4 舊的
+  // 手動關閉的設定一個flag不要檢查上面那個條件
+  // (3)
+  async retry(connHub) {
+    console.log('connHub', connHub)
+    console.log('retry')
+    var conn = this.connStatus.find(
+      s => s.hub.connection.baseUrl === connHub.connection.baseUrl
+    )
+    //setTimer
+    while (
+      conn.retryTimes < 4 &&
+      conn.hub.connection.connectionState !== ConnectionStatus.Connected
+    ) {
+      conn.retryTimes += 1 //三次為限，間隔300ms
+      let times = conn.retryTimes
+      setTimeout(() => {
+        // ......
+        console.log('conn.retryTimes' + times)
+        this.start(connHub)
+      }, 300 * conn.retryTimes)
+    }
+  },
+  // var testMethod = () => {console.log('12345678910')}
+  // HiggsSignalR.resetOn(`http://${document.location.host}/chathub?accessToken=123`,'SendMsgConsole',testMethod)
+  // remove and add (4)
+  async resetOn(hub, method, callback) {
+    var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
+    conn.hub.methods.delete(method.toLowerCase()) ////(1)off method
+    conn.hub.on(method, callback)
   }
+  // connecting the server to the signalr hub
 }
-/*******************************/
+
+/*************** Sample ****************/
 function test() {
   var GetMsg = msg => {
     console.log('SendMsgConsole', msg)
