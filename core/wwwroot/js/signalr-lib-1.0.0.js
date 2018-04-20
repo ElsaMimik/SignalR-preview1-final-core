@@ -191,14 +191,14 @@ const HiggsSignalR = {
     )
     //setTimer
     while (
-      conn.retryTimes < 4 &&
+      conn.retryTimes < 3 &&
       conn.hub.connection.connectionState !== ConnectionStatus.Connected
     ) {
       conn.retryTimes += 1 //三次為限，間隔300ms
       let times = conn.retryTimes
       setTimeout(() => {
         // ......
-        console.log('conn.retryTimes' + times)
+        console.log('conn.retryTimes' + times, connHub)
         this.start(connHub)
       }, 300 * conn.retryTimes)
     }
@@ -215,7 +215,7 @@ const HiggsSignalR = {
 }
 
 /*************** Sample ****************/
-function test() {
+function test(url) {
   var GetMsg = msg => {
     console.log('SendMsgConsole', msg)
     addLine('message-list', msg)
@@ -225,7 +225,7 @@ function test() {
     addLine('message-list', msg)
   }
   HiggsSignalR.mulRegister(
-    `http://${document.location.host}/chathub?accessToken=123`,
+    url,
     new HiggsSignalR.registerClass('GetMsg', GetMsg),
     new HiggsSignalR.registerClass('SendMsgConsole', SendMsgConsole)
   )
@@ -233,11 +233,7 @@ function test() {
   var ShowLog = () => {
     console.log('ShowLog 2018-04-16')
   }
-  HiggsSignalR.start(
-    `http://${document.location.host}/chathub?accessToken=123`,
-    ShowLog,
-    ShowLog
-  )
+  HiggsSignalR.start(url, ShowLog, ShowLog)
 }
 function testInvokeJoinGroup() {
   HiggsSignalR.invoke(
@@ -256,14 +252,10 @@ function testInvokeSendToGroup() {
   )
   // return ''
 }
-function testStop() {
+function testStop(url) {
   var ShowLog = () => {
     console.log('ShowLog')
   }
-  HiggsSignalR.stop(
-    `http://${document.location.host}/chathub?accessToken=123`,
-    ShowLog,
-    ShowLog
-  )
+  HiggsSignalR.stop(url, ShowLog, ShowLog)
   // return ''
 }
