@@ -112,7 +112,7 @@ const HiggsSignalR = class {
       // var isExist = this.connStatus.find(
       //   s => s.hub.connection.baseUrl === connHub.connection.baseUrl
       // )
-      var hubData = this.connections[connHub.connection.baseUrl]
+      var hubData = connHub.hub || this.connections[connHub.connection.baseUrl]
       if (hubData) {
         // 不是人為關閉的情況
         if (
