@@ -35,7 +35,8 @@
   * abc['a'] = 1
   * abc.a->1
 
-  * (8).method on的邏輯修改(hub不要重複就好，method改成點一點)
+  * 8.method on的邏輯修改(hub不要重複就好，method改成點一點) -->
+  * (OK?-->重複start沒問題)
 
   * (9).測試method on的method名稱能否改成點一點
   * (10).呈上，能否關掉點一點後面的，而不會一起關掉
@@ -97,7 +98,9 @@ const HiggsSignalR = class {
             element.callback
           )
         } else {
-          connHub.on(element.method, element.callback)
+          connHub.hub
+            ? connHub.hub.on(element.method, element.callback)
+            : connHub.on(element.method, element.callback)
         }
         /** old logic **/
         // if (!hubData) {
@@ -224,9 +227,32 @@ const HiggsSignalR = class {
     conn.hub.methods.delete(method.toLowerCase()) ////(1)off method
     conn.hub.on(method, callback)
   }
+  async removeMethod(hub, methodName) {
+    var conn = this.connections[hub]
+    conn.hub.methods.delete(methodName.toLowerCase()) ////(1)remove method
+  }
 }
 
 /*************** Sample ****************/
+function test0426() {
+  var GetMsg = msg => {
+    console.log('SendMsgConsole', msg)
+    addLine('message-list', msg)
+  }
+  var SendMsgConsole = msg => {
+    console.log('GetMsg', msg)
+    addLine('message-list', msg)
+  }
+  // 多註冊兩個method
+  _hub.register(
+    'http://localhost:5000/chathub2?accessToken=123',
+    new _hub.registerClass('A.a', GetMsg),
+    new _hub.registerClass('A.b', SendMsgConsole)
+  )
+  // 如何一起刪除A.開頭的 = =?
+  _hub.removeMethod('http://localhost:5000/chathub2?accessToken=123', 'A')
+}
+
 var _hub = new HiggsSignalR()
 function test(url) {
   var GetMsg = msg => {
