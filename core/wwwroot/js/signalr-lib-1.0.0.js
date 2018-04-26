@@ -13,7 +13,7 @@
   * 1.判斷有無websocket(OK)
   * 2.mulRegister改名register(OK)
 
-  * (3).最外面變class，不要讓人家改，method封裝進物件
+  * 3.最外面變class，不要讓人家改，method封裝進物件(OK)
   * var a  = class { constructor() { this.abc = 1; } p() { this.abc++; console.log(this.abc); return this; } }
   * var b = new a()
   * b.p()
@@ -28,7 +28,7 @@
   * 6.forEach檢查(if ele instanceof class)(OK)
   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/instanceof
 
-  * (7).connStatus從[]改成{} --> (OK)
+  * 7.connStatus從[]改成{} --> (OK)
   * 這樣fine就可以直接用["keyWord"]
   * var abc = {}
   * abc['a'] = 1
@@ -39,37 +39,44 @@
   * (9).測試method on的method名稱能否改成點一點
   * (10).呈上，能否關掉點一點後面的，而不會一起關掉
 
-  * (11).呈3，包成class，就可以一直點下去
+  * 11.呈3，包成class，就可以一直點下去(OK)
 
   * (12).enum包成yield Generator
   * https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Statements/function*
  **/
 
-const ConnectionStatus = Object.freeze({
-  Connected: 1,
-  Disconnected: 2,
-  Error: 3
-})
-const HiggsSignalR = {
-  transport: WebSocket ? signalR.TransportType.WebSockets : {},
-  connections: {}, //所有hub連線
-  connStatus: [], //移除
-  connStatusClass: class {
-    constructor(hub, retryTimes, isStop, callback, error) {
-      this.hub = hub
-      this.retryTimes = retryTimes
-      this.isStop = isStop
-      this.callback = callback
-      this.error = error
+// const ConnectionStatus = Object.freeze({
+//   Connected: 1,
+//   Disconnected: 2,
+//   Error: 3
+// })
+const HiggsSignalR = class {
+  constructor() {
+    this.transport = WebSocket ? signalR.TransportType.WebSockets : {}
+    this.connections = {} //所有hub連線
+    // connStatus = [] //移除
+    this.ConnectionStatus = Object.freeze({
+      Connected: 1,
+      Disconnected: 2,
+      Error: 3
+    })
+    this.connStatusClass = class {
+      constructor(hub, retryTimes, isStop, callback, error) {
+        this.hub = hub
+        this.retryTimes = retryTimes
+        this.isStop = isStop
+        this.callback = callback
+        this.error = error
+      }
     }
-  },
-  registerClass: class {
-    constructor(method, callback /*, msg*/) {
-      this.method = method
-      this.callback = callback
-      // this.msg = msg
+    this.registerClass = class {
+      constructor(method, callback /*, msg*/) {
+        this.method = method
+        this.callback = callback
+        // this.msg = msg
+      }
     }
-  },
+  }
   async register(hub, ...regArg) {
     var hubData = this.connections[hub]
     // hubData = hubData? hubData.connection.baseUrl :
@@ -117,7 +124,7 @@ const HiggsSignalR = {
       }
     }
     // return this.connStatus.hub
-  },
+  }
   async start(hub, callback, error) {
     // var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
     var conn = this.connections[hub]
@@ -147,7 +154,7 @@ const HiggsSignalR = {
         error ? error() : conn.error()
       })
     // return this.connStatus.hub
-  },
+  }
   // connecting the server to the signalr hub
   async invoke(hub, method, ...args) {
     var conn = this.connections[hub]
@@ -165,7 +172,7 @@ const HiggsSignalR = {
         console.log(err)
       })
     // return this.connStatus.hub
-  },
+  }
   // (1)
   async stop(hub, callback, error) {
     // var conn = this.connStatus.find(s => s.hub.connection.baseUrl === hub)
@@ -182,7 +189,7 @@ const HiggsSignalR = {
         error()
       })
     // return this.connStatus.hub
-  },
+  }
   // getConnectionHub(connectionHub) {
   //   return this.connections.find(
   //     s => s.connection.baseUrl === connectionHub.connection.baseUrl
@@ -193,7 +200,7 @@ const HiggsSignalR = {
     // return this.connStatus.find(
     //   s => s.hub.connection.baseUrl === hubBaseUrl.connection.baseUrl
     // )
-  },
+  }
   addConnectionHub(connectionHub) {
     var hubData = connectionHub.hub
       ? connectionHub.hub.connection.baseUrl
@@ -219,7 +226,7 @@ const HiggsSignalR = {
     //   // this.connections.push(connectionHub)
     //   this.connStatus.push(new this.connStatusClass(connectionHub, 0, false))
     // }
-  },
+  }
   // 300ms檢查一次 | check status === 3 才retry
   // Connecting = 0 ; Connected = 1 ; Disconnected = 2 新的
   // onnecting: 0, connected: 1, reconnecting: 2, disconnected: 4 舊的
@@ -245,7 +252,7 @@ const HiggsSignalR = {
         this.start(connHub)
       }, 300 * conn.retryTimes)
     }
-  },
+  }
   // var testMethod = () => {console.log('12345678910')}
   // HiggsSignalR.resetOn(`http://${document.location.host}/chathub?accessToken=123`,'SendMsgConsole',testMethod)
   // remove and add (4)
@@ -274,6 +281,7 @@ const HiggsSignalR = {
 }
 
 /*************** Sample ****************/
+var _hub = new HiggsSignalR()
 function test(url) {
   var GetMsg = msg => {
     console.log('SendMsgConsole', msg)
@@ -283,19 +291,20 @@ function test(url) {
     console.log('GetMsg', msg)
     addLine('message-list', msg)
   }
-  HiggsSignalR.register(
+
+  _hub.register(
     url,
-    new HiggsSignalR.registerClass('GetMsg', GetMsg),
-    new HiggsSignalR.registerClass('SendMsgConsole', SendMsgConsole)
+    new _hub.registerClass('GetMsg', GetMsg),
+    new _hub.registerClass('SendMsgConsole', SendMsgConsole)
   )
 
   var ShowLog = () => {
     console.log('ShowLog 2018-04-16')
   }
-  HiggsSignalR.start(url, ShowLog, ShowLog)
+  _hub.start(url, ShowLog, ShowLog)
 }
 function testInvokeJoinGroup() {
-  HiggsSignalR.invoke(
+  _hub.invoke(
     `http://${document.location.host}/chathub?accessToken=123`,
     'JoinGroup',
     'Group01'
@@ -303,7 +312,7 @@ function testInvokeJoinGroup() {
   // return ''
 }
 function testInvokeSendToGroup() {
-  HiggsSignalR.invoke(
+  _hub.invoke(
     `http://${document.location.host}/chathub?accessToken=123`,
     'SendToGroup',
     'Group01',
@@ -315,6 +324,6 @@ function testStop(url) {
   var ShowLog = () => {
     console.log('ShowLog')
   }
-  HiggsSignalR.stop(url, ShowLog, ShowLog)
+  _hub.stop(url, ShowLog, ShowLog)
   // return ''
 }
