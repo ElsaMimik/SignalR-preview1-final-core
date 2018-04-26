@@ -73,6 +73,9 @@ const HiggsSignalR = class {
       }
     }
   }
+  getAllConn() {
+    console.log('all hub data', this.connections)
+  }
   async register(hub, ...regArg) {
     var hubData = this.connections[hub]
     var connHub =
@@ -82,19 +85,32 @@ const HiggsSignalR = class {
       })
     this.addConnectionHub(connHub)
     var argsArray = Array.prototype.slice.call(arguments).slice(1)
+    var _isStop = hubData && hubData.isStop //已存在的hub而且手動關閉過
     for (let element of argsArray) {
       if (element instanceof this.registerClass) {
-        if (!hubData) {
-          // 如果已存在該連線，則刪除再加入
-          // 否則會造成合併method內容
-          connHub.on(element.method, element.callback)
-        } else {
+        //一律註冊，除非手動關閉過
+        if (_isStop) {
+          hubData.isStop = false
           this.resetOn(
             hubData.hub.connection.baseUrl,
             element.method,
             element.callback
           )
+        } else {
+          connHub.on(element.method, element.callback)
         }
+        /** old logic **/
+        // if (!hubData) {
+        //   // 如果已存在該連線，則刪除再加入
+        //   // 否則會造成合併method內容
+        //   connHub.on(element.method, element.callback)
+        // } else {
+        //   this.resetOn(
+        //     hubData.hub.connection.baseUrl,
+        //     element.method,
+        //     element.callback
+        //   )
+        // }
       }
     }
     var onClose = hubData ? hubData.hub : connHub
@@ -178,6 +194,7 @@ const HiggsSignalR = class {
         connectionHub.connection.baseUrl
       ] = new this.connStatusClass(connectionHub, 0, false)
     }
+    console.log('all hub data', this.connections)
   }
   // 300ms檢查一次 | check status === 3 才retry
   // Connecting = 0 ; Connected = 1 ; Disconnected = 2 (新的
