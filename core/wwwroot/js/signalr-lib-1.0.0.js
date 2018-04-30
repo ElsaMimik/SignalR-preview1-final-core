@@ -236,18 +236,24 @@ const HiggsSignalR = class {
 /*************** Sample ****************/
 function test0426() {
   var GetMsg = msg => {
-    console.log('SendMsgConsole', msg)
-    addLine('message-list', msg)
+    console.log('SendMsgConsole-2', msg)
+    addLine('message-list-2', msg)
   }
   var SendMsgConsole = msg => {
-    console.log('GetMsg', msg)
-    addLine('message-list', msg)
+    console.log('GetMsg-2', msg)
+    addLine('message-list-2', msg)
   }
   // 多註冊兩個method
   _hub.register(
     'http://localhost:5000/chathub2?accessToken=123',
     new _hub.registerClass('A.a', GetMsg),
     new _hub.registerClass('A.b', SendMsgConsole)
+  )
+  // 同名稱做不同的事情
+  _hub.register(
+    'http://localhost:5000/chathub2?accessToken=123',
+    new _hub.registerClass('GetMsg', GetMsg),
+    new _hub.registerClass('SendMsgConsole', SendMsgConsole)
   )
   // 如何一起刪除A.開頭的 = =?
   _hub.removeMethod('http://localhost:5000/chathub2?accessToken=123', 'A')
