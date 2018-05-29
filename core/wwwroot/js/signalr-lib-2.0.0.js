@@ -44,7 +44,7 @@ const HiggsSignalR = class {
         var connHub =
             hubData ||
             new signalR.HubConnectionBuilder()
-                .withUrl("http://localhost:49351/chat?accessToken=123")
+                .withUrl("http://localhost:53191/CsChatting?accessToken=123")
                 .build()
         //new signalR.HubConnection(hub, {
         //  transport: this.transport
@@ -216,12 +216,12 @@ var SendMsgConsole = msg => {
 }
 
 _test.register(
-    'http://localhost:49351/chat?accessToken=123',
+    'http://localhost:53191/CsChatting?accessToken=123',
     new _test.registerClass('GetMsg', GetMsg),
     new _test.registerClass('SendMsgConsole', SendMsgConsole)
 )
 
-_test.start('http://localhost:49351/chat?accessToken=123')
+_test.start('http://localhost:53191/CsChatting?accessToken=123')
 
 /*************** Sample ****************/
 
